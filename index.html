@@ -24,8 +24,8 @@ body{background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans Thai","Zen 
 .top{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
 h1{margin:0;font:700 clamp(28px,4vw,40px)/1.1 "Zen Maru Gothic","Noto Sans Thai",sans-serif;letter-spacing:-.01em}
 h1 small{display:block;font:500 15px/1.4 "Noto Sans Thai",sans-serif;opacity:.8;margin-top:6px;letter-spacing:0}
-.tabs{display:flex;gap:4px;background:#ffffff1f;padding:4px;border-radius:999px}
-.tabs button{border:0;background:none;color:#fff;font:500 15px "Noto Sans Thai",sans-serif;padding:10px 16px;border-radius:999px;cursor:pointer;min-height:44px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;background:#ffffff1f;padding:4px;border-radius:22px}
+.tabs button{white-space:nowrap;border:0;background:none;color:#fff;font:500 15px "Noto Sans Thai",sans-serif;padding:10px 16px;border-radius:999px;cursor:pointer;min-height:44px}
 .tabs button[aria-pressed=true]{background:#fff;color:var(--band)}
 .chips{max-width:1100px;margin:16px auto 0;display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
 .chips button{flex:none;border:1px solid #ffffff40;background:var(--chip);color:#fff;border-radius:999px;padding:8px 14px;font:500 14px "Noto Sans Thai",sans-serif;cursor:pointer;min-height:40px;white-space:nowrap}
@@ -99,6 +99,20 @@ td small{color:var(--soft)}
 .tres .ok{color:var(--ok);font-weight:700}.tres .ng{color:var(--shu);font-weight:700}
 .note{margin-top:12px;font-size:15px;color:var(--soft)}
 .note b{font-family:"Zen Maru Gothic",sans-serif;color:var(--ink);font-weight:700}
+.exp{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px}
+.exp p{margin:0 0 8px}
+.exp ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.exp li{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr);gap:10px;padding:6px 8px;border-radius:10px}
+.exp li.r{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.exp li.w{background:color-mix(in srgb,var(--shu) 12%,transparent)}
+.exp li b{font-family:"Zen Maru Gothic",sans-serif}
+.exp li small{display:block;color:var(--soft)}
+.sent{font:500 clamp(19px,3.4vw,25px)/1.8 "Zen Maru Gothic",sans-serif;text-align:left}
+.blank{display:inline-block;min-width:4.5em;margin:0 4px;border-bottom:3px solid var(--shu);text-align:center;color:var(--shu);font-weight:700}
+.aff{font:700 clamp(40px,9vw,64px)/1.2 "Zen Maru Gothic",sans-serif}
+.aff .blank{min-width:1.6em}
+.tres .exp{text-align:left}
+@media(max-width:600px){.exp li{grid-template-columns:minmax(0,1fr)}}
 [hidden]{display:none!important}
 @media(max-width:600px){.ctl{grid-template-columns:repeat(2,minmax(0,1fr))}.ctl .prev{order:3}.ctl .next{order:4}.ans{grid-template-columns:minmax(0,1fr)}table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding:8px 0}.stack td{border:0;padding:2px 12px}.stack td.w{font-size:22px}.keys{display:none}}
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
@@ -112,13 +126,15 @@ td small{color:var(--soft)}
       <button id="t-card" aria-pressed="true">การ์ด</button>
       <button id="t-quiz" aria-pressed="false">ควิซ</button>
       <button id="t-list" aria-pressed="false">รายการคำ</button>
+      <button id="t-aff" aria-pressed="false">เติมคำหน้า-หลัง</button>
+      <button id="t-fill" aria-pressed="false">เติมคำในประโยค</button>
     </div>
   </div>
-  <div class="chips" id="chips" role="group" aria-label="หมวดหมู่"></div>
-  <div class="chips sub" id="chips2" role="group" aria-label="กลุ่มคำ"></div>
+  <div class="chips wf" id="chips" role="group" aria-label="หมวดหมู่"></div>
+  <div class="chips sub wf" id="chips2" role="group" aria-label="กลุ่มคำ"></div>
 </header>
 <main>
-  <div class="bar">
+  <div class="bar wf">
     <div class="prog"><span id="pt">จำได้แล้ว 0/0</span><div class="track"><i id="pb"></i></div></div>
     <div class="opts">
       <button class="tog" id="o-dir" aria-pressed="false">ไทย → ญี่ปุ่น</button>
@@ -126,6 +142,7 @@ td small{color:var(--soft)}
       <button class="tog" id="o-roma" aria-pressed="false">โรมาจิ</button>
       <button class="tog" id="o-left" aria-pressed="false">เฉพาะคำที่ยังจำไม่ได้</button>
       <button class="tog" id="o-shuf">สุ่มลำดับ</button>
+      <button class="tog" id="o-reset">รีเซ็ตที่จำได้</button>
     </div>
   </div>
 
@@ -157,6 +174,25 @@ td small{color:var(--soft)}
     </div>
   </section>
 
+
+  <section id="v-aff" hidden>
+    <div class="q">
+      <div class="face"><span class="num" id="aff-num"></span><span class="cat" id="aff-cat"></span><div id="aff-body"></div></div>
+      <div class="ans" id="aff-ans"></div>
+      <div class="exp" id="aff-exp" hidden></div>
+      <div class="score"><span id="aff-score">ถูก 0 จาก 0 ข้อ</span><button class="btn" id="aff-next">ข้อต่อไป →</button></div>
+      <p class="keys">เลือกคำหน้า (接頭語) หรือคำหลัง (接尾語) ที่เติมแล้วเป็นคำที่ถูกต้อง · กด 1–4 เพื่อตอบ, Enter ข้อต่อไป</p>
+    </div>
+  </section>
+  <section id="v-fill" hidden>
+    <div class="q">
+      <div class="face"><span class="num" id="fill-num"></span><span class="cat" id="fill-cat"></span><div id="fill-body"></div></div>
+      <div class="ans" id="fill-ans"></div>
+      <div class="exp" id="fill-exp" hidden></div>
+      <div class="score"><span id="fill-score">ถูก 0 จาก 0 ข้อ</span><button class="btn" id="fill-next">ข้อต่อไป →</button></div>
+      <p class="keys">เลือกคำที่เหมาะกับช่องว่าง (แนวข้อสอบ 文脈規定) · กด 1–4 เพื่อตอบ, Enter ข้อต่อไป</p>
+    </div>
+  </section>
   <section id="v-list" hidden>
     <p><input class="search" id="search" type="search" placeholder="ค้นหา: ญี่ปุ่น ไทย หรือโรมาจิ"></p>
     <div class="scroll"><table class="stack"><thead><tr><th>คำ</th><th>คำอ่าน</th><th>ความหมาย</th><th>หมวด</th><th>ความถี่</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
@@ -165,6 +201,160 @@ td small{color:var(--soft)}
 <script>
 {
 const CATS={k:"คำนาม (คันจิ)",w:"คำกริยา",f:"กริยาผสม",a:"คุณศัพท์",d:"คำวิเศษณ์",o:"คำเลียนเสียง",t:"คาตาคานะ",g:"คำเติมหน้า-หลัง"};
+const AFF=`pre|非|常識|ひじょうしき|ไม่มีสามัญสำนึก|非,未,不,無
+pre|非|公式|ひこうしき|ไม่เป็นทางการ|非,未,不,無
+pre|非|現実的|ひげんじつてき|ไม่สมจริง, เพ้อฝัน|非,未,不,無
+pre|未|経験|みけいけん|ยังไม่มีประสบการณ์|非,未,不,無
+pre|未|完成|みかんせい|ยังไม่เสร็จสมบูรณ์|非,未,不,無
+pre|未|解決|みかいけつ|ยังไม่ได้แก้ไข|非,未,不,無
+pre|不|正確|ふせいかく|ไม่แม่นยำ|非,未,不,無
+pre|不|注意|ふちゅうい|ไม่ระมัดระวัง, สะเพร่า|非,未,不,無
+pre|不|完全|ふかんぜん|ไม่สมบูรณ์|非,未,不,無
+pre|無|責任|むせきにん|ไม่รับผิดชอบ|非,未,不,無
+pre|無|関係|むかんけい|ไม่เกี่ยวข้อง|非,未,不,無
+pre|無|関心|むかんしん|ไม่สนใจ, เฉยเมย|非,未,不,無
+pre|再|確認|さいかくにん|การยืนยันอีกครั้ง|再,最,副,準
+pre|再|利用|さいりよう|การนำกลับมาใช้ใหม่|再,最,副,準
+pre|再|開発|さいかいはつ|การพัฒนาใหม่|再,最,副,準
+pre|最|先端|さいせんたん|ล้ำสมัยที่สุด|再,最,副,準
+pre|最|優秀|さいゆうしゅう|ยอดเยี่ยมที่สุด|再,最,副,準
+pre|最|年長|さいねんちょう|อายุมากที่สุด (ในกลุ่ม)|再,最,副,準
+pre|副|社長|ふくしゃちょう|รองประธานบริษัท|再,最,副,準
+pre|副|作用|ふくさよう|ผลข้างเคียง (ของยา)|再,最,副,準
+pre|準|決勝|じゅんけっしょう|รอบรองชนะเลิศ|再,最,副,準
+pre|準|優勝|じゅんゆうしょう|ได้ที่ 2, รองแชมป์|再,最,副,準
+pre|超|満員|ちょうまんいん|คนแน่นสุดๆ|超,再,副,準
+pre|超|高速|ちょうこうそく|ความเร็วสูงพิเศษ|超,再,副,準
+suf|料|使用|しようりょう|ค่าใช้งาน|料,代,費,賃
+suf|料|入場|にゅうじょうりょう|ค่าเข้าชม|料,代,費,賃
+suf|料|授業|じゅぎょうりょう|ค่าเล่าเรียน|料,代,費,賃
+suf|代|タクシー|タクシーだい|ค่าแท็กซี่|料,代,費,賃
+suf|代|ガス|ガスだい|ค่าแก๊ส|料,代,費,賃
+suf|代|部屋|へやだい|ค่าห้อง|料,代,費,賃
+suf|費|交通|こうつうひ|ค่าเดินทาง|料,代,費,賃
+suf|費|生活|せいかつひ|ค่าครองชีพ|料,代,費,賃
+suf|費|医療|いりょうひ|ค่ารักษาพยาบาล|料,代,費,賃
+suf|賃|家|やちん|ค่าเช่าบ้าน|料,代,費,賃
+suf|賃|運|うんちん|ค่าโดยสาร|料,代,費,賃
+suf|化|少子|しょうしか|อัตราการเกิดลดลง|化,的,性,感
+suf|化|高齢|こうれいか|การเข้าสู่สังคมผู้สูงอายุ|化,的,性,感
+suf|化|温暖|おんだんか|ภาวะโลกร้อน|化,的,性,感
+suf|的|一時|いちじてき|ชั่วคราว|化,的,性,感
+suf|的|魅力|みりょくてき|มีเสน่ห์|化,的,性,感
+suf|的|印象|いんしょうてき|น่าประทับใจ|化,的,性,感
+suf|性|安全|あんぜんせい|ความปลอดภัย|化,的,性,感
+suf|性|可能|かのうせい|ความเป็นไปได้|化,的,性,感
+suf|性|必要|ひつようせい|ความจำเป็น|化,的,性,感
+suf|感|責任|せきにんかん|ความรู้สึกรับผิดชอบ|化,的,性,感
+suf|感|達成|たっせいかん|ความรู้สึกภูมิใจที่ทำสำเร็จ|化,的,性,感
+suf|感|安心|あんしんかん|ความรู้สึกสบายใจ|化,的,性,感
+suf|だらけ|泥|どろだらけ|เปื้อนโคลนเต็มไปหมด|だらけ,っぽい,気味,ぶり
+suf|だらけ|傷|きずだらけ|เต็มไปด้วยรอยแผล|だらけ,っぽい,気味,ぶり
+suf|だらけ|ゴミ|ゴミだらけ|ขยะเต็มไปหมด|だらけ,っぽい,気味,ぶり
+suf|っぽい|忘れ|わすれっぽい|ขี้ลืม|だらけ,っぽい,気味,ぶり
+suf|っぽい|怒り|おこりっぽい|โกรธง่าย|だらけ,っぽい,気味,ぶり
+suf|っぽい|安|やすっぽい|ดูถูกๆ ไม่มีราคา|だらけ,っぽい,気味,ぶり
+suf|気味|疲れ|つかれぎみ|ค่อนข้างเหนื่อย|だらけ,っぽい,気味,ぶり
+suf|気味|太り|ふとりぎみ|ทำท่าจะอ้วนขึ้น|だらけ,っぽい,気味,ぶり
+suf|気味|遅れ|おくれぎみ|ค่อนข้างล่าช้า|だらけ,っぽい,気味,ぶり
+suf|ぶり|久し|ひさしぶり|นานแล้วที่ไม่ได้...|だらけ,っぽい,気味,ぶり
+suf|ぶり|3年|さんねんぶり|ครั้งแรกในรอบ 3 ปี|だらけ,っぽい,気味,ぶり
+suf|ぶり|1週間|いっしゅうかんぶり|ครั้งแรกในรอบ 1 สัปดาห์|だらけ,っぽい,気味,ぶり
+suf|おき|一日|いちにちおき|วันเว้นวัน|おき,向け,放題,済み
+suf|おき|2時間|にじかんおき|ทุกๆ 2 ชั่วโมง|おき,向け,放題,済み
+suf|おき|1メートル|いちメートルおき|ทุกๆ 1 เมตร|おき,向け,放題,済み
+suf|向け|子供|こどもむけ|สำหรับเด็ก|おき,向け,放題,済み
+suf|向け|外国人|がいこくじんむけ|สำหรับชาวต่างชาติ|おき,向け,放題,済み
+suf|向け|初心者|しょしんしゃむけ|สำหรับมือใหม่|おき,向け,放題,済み
+suf|放題|食べ|たべほうだい|กินได้ไม่อั้น|おき,向け,放題,済み
+suf|放題|飲み|のみほうだい|ดื่มได้ไม่อั้น|おき,向け,放題,済み
+suf|放題|言いたい|いいたいほうだい|พูดได้ตามใจชอบ|おき,向け,放題,済み
+suf|済み|使用|しようずみ|ใช้แล้ว|おき,向け,放題,済み
+suf|済み|支払い|しはらいずみ|ชำระเงินแล้ว|おき,向け,放題,済み
+suf|済み|確認|かくにんずみ|ตรวจสอบแล้ว|おき,向け,放題,済み
+suf|者|参加|さんかしゃ|ผู้เข้าร่วม|者,家,員,製
+suf|者|利用|りようしゃ|ผู้ใช้|者,家,員,製
+suf|者|希望|きぼうしゃ|ผู้ที่ต้องการ (สมัคร)|者,家,員,製
+suf|家|専門|せんもんか|ผู้เชี่ยวชาญ|者,家,員,製
+suf|家|政治|せいじか|นักการเมือง|者,家,員,製
+suf|家|音楽|おんがくか|นักดนตรี|者,家,員,製
+suf|員|会社|かいしゃいん|พนักงานบริษัท|者,家,員,製
+suf|員|店|てんいん|พนักงานร้าน|者,家,員,製
+suf|員|公務|こうむいん|ข้าราชการ|者,家,員,製
+suf|製|日本|にほんせい|ผลิตในญี่ปุ่น|者,家,員,製
+suf|製|外国|がいこくせい|ผลิตในต่างประเทศ|者,家,員,製
+suf|製|プラスチック|プラスチックせい|ทำจากพลาสติก|者,家,員,製
+suf|率|合格|ごうかくりつ|อัตราสอบผ่าน|率,力,感,化
+suf|率|出席|しゅっせきりつ|อัตราการเข้าเรียน|率,力,感,化
+suf|率|失業|しつぎょうりつ|อัตราการว่างงาน|率,力,感,化
+suf|力|想像|そうぞうりょく|จินตนาการ (ความสามารถในการจินตนาการ)|率,力,感,化
+suf|力|記憶|きおくりょく|ความจำ|率,力,感,化
+suf|力|表現|ひょうげんりょく|ความสามารถในการถ่ายทอด|率,力,感,化
+suf|ごと|皮|かわごと|ทั้งเปลือก|ごと,明け,風,向き
+suf|ごと|骨|ほねごと|ทั้งกระดูก|ごと,明け,風,向き
+suf|明け|休み|やすみあけ|หลังวันหยุด|ごと,明け,風,向き
+suf|明け|連休|れんきゅうあけ|หลังวันหยุดยาว|ごと,明け,風,向き
+suf|風|和|わふう|สไตล์ญี่ปุ่น|ごと,明け,風,向き
+suf|風|洋|ようふう|สไตล์ตะวันตก|ごと,明け,風,向き
+suf|向き|一人暮らし|ひとりぐらしむき|เหมาะกับคนอยู่คนเดียว|ごと,明け,風,向き`.split("\n").map(l=>{const[p,a,s,r,th,o]=l.split("|");return{p,a,s,r,th,o:o.split(",")}});
+const FILL=`会議の日程が（　）になったので、メールで知らせます。|変更|変更,交換,選択,省略|กำหนดการประชุมมีการเปลี่ยนแปลง จึงจะแจ้งทางอีเมล
+この薬はよく（　）。|効く|効く,届く,叶う,乾く|ยานี้ได้ผลดี
+雨の日は駅前の道路がよく（　）する。|渋滞|渋滞,混乱,延期,発生|วันที่ฝนตก ถนนหน้าสถานีมักรถติด
+彼は授業中、（　）に手を挙げて質問する。|積極的|積極的,抽象的,主観的,合理的|ในห้องเรียน เขายกมือถามอย่างกระตือรือร้น
+面接の前はとても（　）して、手が震えた。|緊張|緊張,遠慮,我慢,理解|ก่อนสัมภาษณ์ตื่นเต้นมากจนมือสั่น
+先輩に頼まれた仕事を（　）ことにした。|引き受ける|引き受ける,立ち止まる,追い越す,思い込む|ตัดสินใจรับงานที่รุ่นพี่ขอไว้
+知らない町で道に（　）、約束に遅れてしまった。|迷って=迷う|迷って=迷う,悩んで=悩む,離れて=離れる,外して=外す|หลงทางในเมืองที่ไม่รู้จัก เลยไปสายกว่าเวลานัด
+この問題について、もう少し（　）してから決めましょう。|検討|検討,評価,報告,登録|เรื่องนี้ขอพิจารณาอีกสักหน่อยแล้วค่อยตัดสินใจกัน
+時間に（　）があるので、コーヒーでも飲みましょう。|余裕|余裕,不足,負担,迷惑|ยังมีเวลาเหลือ ไปดื่มกาแฟกันเถอะ
+新しいシステムは使い方が（　）で、だれでもすぐ使える。|単純|単純,深刻,慎重,贅沢|ระบบใหม่ใช้งานง่าย ใครก็ใช้ได้ทันที
+赤ちゃんが起きないように、ドアを（　）閉めた。|そっと|そっと,うっかり,わざと,いきなり|ปิดประตูเบาๆ ไม่ให้ลูกตื่น
+（　）財布を家に忘れてきてしまった。|うっかり|うっかり,わざわざ,せっかく,さすが|เผลอลืมกระเป๋าสตางค์ไว้ที่บ้าน
+（　）来てくれたのに、留守にしていてすみません。|わざわざ|わざわざ,うっかり,いきなり,ほぼ|อุตส่าห์มาหา แต่ไม่อยู่บ้าน ขอโทษนะ
+（　）の休みなのに、雨で出かけられない。|せっかく|せっかく,わざと,たまたま,なるべく|อุตส่าห์ได้หยุดทั้งที แต่ฝนตกเลยออกไปไหนไม่ได้
+駅で（　）昔の友達に会った。|ばったり|ばったり,ぐっすり,しっかり,ぴったり|เจอเพื่อนเก่าที่สถานีโดยบังเอิญ
+昨日は疲れていたので、（　）眠れた。|ぐっすり|ぐっすり,こっそり,ばったり,ぶらぶら|เมื่อวานเหนื่อย เลยหลับสนิท
+このズボンはサイズが（　）だ。|ぴったり|ぴったり,はっきり,すっきり,のんびり|กางเกงตัวนี้ขนาดพอดีเป๊ะ
+試験が終わって（　）した。|ほっと|ほっと,うろうろ,そわそわ,じっと|สอบเสร็จแล้วโล่งใจ
+電車がなかなか来なくて（　）した。|いらいら|いらいら,わくわく,ほっと,にこにこ|รถไฟไม่มาสักที เลยหงุดหงิด
+明日から旅行なので、（　）している。|わくわく|わくわく,がっかり,ぼんやり,ほっと|พรุ่งนี้จะไปเที่ยว เลยตื่นเต้น
+楽しみにしていたコンサートが中止になって、（　）した。|がっかり|がっかり,わくわく,すっきり,ほっと|ผิดหวังที่คอนเสิร์ตที่รอคอยถูกยกเลิก
+この仕事はあなたに（　）ます。|任せ=任せる|任せ=任せる,避け=避ける,防ぎ=防ぐ,省き=省く|งานนี้ขอมอบให้คุณนะ
+事故を（　）ために、スピードを落としてください。|防ぐ|防ぐ,超える,示す,稼ぐ|เพื่อป้องกันอุบัติเหตุ กรุณาลดความเร็ว
+人が多い時間を（　）、朝早く出かけた。|避けて=避ける|避けて=避ける,任せて=任せる,認めて=認める,求めて=求める|หลีกเลี่ยงช่วงที่คนเยอะ เลยออกจากบ้านแต่เช้า
+彼は自分の間違いを（　）、謝った。|認めて=認める|認めて=認める,疑って=疑う,扱って=扱う,狙って=狙う|เขายอมรับความผิดของตัวเองแล้วขอโทษ
+会社全体で環境問題に（　）いる。|取り組んで=取り組む|取り組んで=取り組む,付き合って=付き合う,立ち上がって=立ち上がる,乗り換えて=乗り換える|ทั้งบริษัทกำลังทุ่มเทแก้ปัญหาสิ่งแวดล้อม
+詳しいことは、お電話でお（　）ください。|問い合わせ=問い合わせる|問い合わせ=問い合わせる,申し込み=申し込む,受け取り=受け取る,見直し=見直す|สอบถามรายละเอียดทางโทรศัพท์ได้
+この店は品物の種類が（　）だ。|豊富|豊富,貴重,新鮮,透明|ร้านนี้มีสินค้าหลากหลายมาก
+この料理は野菜が（　）でおいしい。|新鮮|新鮮,透明,地味,派手|อาหารจานนี้ผักสด อร่อย
+彼女はいつも（　）な服を着ていて、すぐに目立つ。|派手|派手,地味,素直,平気|เธอใส่เสื้อผ้าฉูดฉาดเสมอ เลยโดดเด่นทันที
+説明が（　）で、何を言いたいのかわからない。|曖昧|曖昧,明らか,正確,確実|คำอธิบายคลุมเครือ ไม่รู้ว่าอยากจะพูดอะไร
+この仕事は（　）が大きいので、二人でやりましょう。|負担|負担,余裕,効率,存在|งานนี้ภาระหนัก ทำสองคนกันเถอะ
+スマホは今や私たちの生活に（　）な存在だ。|身近|身近,大げさ,退屈,深刻|ทุกวันนี้สมาร์ทโฟนเป็นสิ่งใกล้ตัวในชีวิตของเรา
+出かける前に、ドアのかぎが閉まっているか（　）。|確かめた=確かめる|確かめた=確かめる,任せた=任せる,済ませた=済ませる,求めた=求める|ก่อนออกจากบ้าน ตรวจดูว่าล็อกประตูแล้วหรือยัง
+ここでたばこを吸うことは（　）されています。|禁止|禁止,中止,一致,省略|ที่นี่ห้ามสูบบุหรี่
+台風のため、明日の試合は（　）になった。|中止|中止,禁止,一致,削除|เพราะไต้ฝุ่น การแข่งขันพรุ่งนี้จึงถูกยกเลิก
+来週の会議の前に、課長と（　）をする予定だ。|打ち合わせ|打ち合わせ,言い訳,手続き,話題|ก่อนประชุมสัปดาห์หน้า มีนัดคุยงานกับหัวหน้าแผนก
+遅刻の（　）ばかりしないで、早く起きなさい。|言い訳|言い訳,打ち合わせ,評判,話題|อย่าเอาแต่แก้ตัวเรื่องมาสาย ตื่นให้เช้าหน่อย
+この店はおいしいと（　）だ。|評判|評判,印象,宣伝,意識|ร้านนี้มีชื่อเสียงว่าอร่อย
+彼の話を聞いて、強い（　）を受けた。|印象|印象,記憶,想像,意識|ฟังเรื่องของเขาแล้วรู้สึกประทับใจมาก
+日本は（　）が進んで、子どもの数が減っている。|少子化|少子化,国際,福祉,伝統|ญี่ปุ่นอัตราการเกิดลดลง จำนวนเด็กก็ลดลง
+毎日（　）勉強を続けて、ついに合格した。|こつこつ|こつこつ,ごろごろ,ぶらぶら,そわそわ|ขยันเรียนทีละนิดทุกวัน ในที่สุดก็สอบผ่าน
+彼は日本語が（　）だ。|ぺらぺら|ぺらぺら,ぴかぴか,からから,ふらふら|เขาพูดภาษาญี่ปุ่นคล่องปร๋อ
+電車に（　）間に合った。|ぎりぎり|ぎりぎり,じっと,すらすら,にっこり|ทันรถไฟแบบเฉียดฉิว
+（　）雨が降ってきて、びしょぬれになった。|いきなり|いきなり,せっかく,わざわざ,むしろ|จู่ๆ ฝนก็ตก เปียกโชกไปหมด
+タクシーで行ったら、渋滞で（　）遅くなった。|かえって|かえって,さすが,せめて,まさか|นั่งแท็กซี่ไป แต่รถติดเลยกลับช้ากว่าเดิม
+（　）プロの料理人だけあって、とてもおいしい。|さすが|さすが,かえって,せめて,いずれ|สมกับเป็นเชฟมืออาชีพ อร่อยมาก
+（　）一日に一回は家族に電話しなさい。|せめて|せめて,さすが,まさか,とっくに|อย่างน้อยวันละครั้งก็โทรหาครอบครัวบ้าง
+書類は（　）早く出してください。|なるべく|なるべく,わざと,ちっとも,めったに|กรุณาส่งเอกสารให้เร็วที่สุดเท่าที่ทำได้
+長い間待って、（　）順番が来た。|ようやく|ようやく,ちっとも,めったに,けっして|รอมานาน ในที่สุดก็ถึงคิว
+彼は（　）遅刻しない。|めったに|めったに,しばしば,さっそく,いったん|เขาแทบไม่เคยมาสาย
+新しいパソコンが届いたので、（　）使ってみた。|さっそく|さっそく,とっくに,いずれ,めったに|คอมพิวเตอร์เครื่องใหม่มาถึง เลยลองใช้ทันที
+春になって、気温が（　）上がってきた。|次第に|次第に,一斉に,直ちに,互いに|พอเข้าฤดูใบไม้ผลิ อุณหภูมิก็ค่อยๆ สูงขึ้น
+ベルが鳴ると、学生たちは（　）教室を出た。|一斉に|一斉に,実に,互いに,単に|พอกริ่งดัง นักเรียนก็ออกจากห้องพร้อมกัน
+将来は通訳になることを（　）、毎日勉強している。|目指して=目指す|目指して=目指す,示して=示す,占めて=占める,抱えて=抱える|ตั้งเป้าว่าจะเป็นล่าม เลยเรียนทุกวัน
+このグラフは、売り上げの変化を（　）いる。|示して=示す|示して=示す,目指して=目指す,狙って=狙う,補って=補う|กราฟนี้แสดงการเปลี่ยนแปลงของยอดขาย
+女性が社員の半分以上を（　）いる。|占めて=占める|占めて=占める,示して=示す,抱えて=抱える,詰めて=詰める|ผู้หญิงคิดเป็นมากกว่าครึ่งของพนักงาน
+彼は多くの問題を（　）いて、大変そうだ。|抱えて=抱える|抱えて=抱える,占めて=占める,省いて=省く,稼いで=稼ぐ|เขามีปัญหาหลายเรื่องรุมเร้า ดูลำบากมาก`.split("\n").map(l=>{const[s,a,o,th]=l.split("|");const opts=o.split(",").map(x=>{const[d,b]=x.split("=");return{d,b:b||d}});return{s,a:opts.findIndex(x=>x.d===a.split("=")[0]),opts,th}});
 const GN={g1:"กลุ่ม 1 คำออกบ่อย",g2:"กลุ่ม 2 คำลึก"};
 const RAW=`影響|えいきょう|อิทธิพล, ผลกระทบ|k|3|
 効果|こうか|ผล, ประสิทธิผล|k|3|
@@ -730,6 +920,7 @@ const RAW=`影響|えいきょう|อิทธิพล, ผลกระทบ|k
 〜賃|〜ちん|ค่า (เช่น 家賃 ค่าเช่าบ้าน)|g|1|
 〜者|〜しゃ|ผู้ (เช่น 参加者 ผู้เข้าร่วม)|g|2|
 〜家|〜か|ผู้เชี่ยวชาญ (เช่น 専門家)|g|2|
+〜員|〜いん|พนักงาน, สมาชิก (เช่น 会社員)|g|1|
 〜製|〜せい|ผลิตจาก/โดย (เช่น 日本製)|g|2|
 〜産|〜さん|ผลผลิตจาก (เช่น 北海道産)|g|1|
 〜風|〜ふう|สไตล์ (เช่น 和風 สไตล์ญี่ปุ่น)|g|2|
@@ -771,6 +962,7 @@ function romaji(s){
 }
 W.forEach(x=>{x.ro=romaji(x.r||x.w);x.kj=/[一-鿿]/.test(x.w)});
 const KEY="n2known";
+const WM={};W.forEach(x=>WM[x.w]=x);
 let known=new Set();
 try{known=new Set(JSON.parse(localStorage.getItem(KEY)||"[]"))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...known]))}catch(e){}};
@@ -871,6 +1063,8 @@ function answer(b){
   if(answered||!b)return;answered=true;
   const right=+b.dataset.k===qx.i;score(right);
   [...$("ans").children].forEach(el=>{if(+el.dataset.k===qx.i)el.classList.add("r");else if(el===b)el.classList.add("w")});
+  if(!right){const o=W[+b.dataset.k];$("tres").innerHTML=`<div class="exp"><p><span class="ng">ยังไม่ใช่</span> เทียบคำที่เลือกกับคำตอบที่ถูก</p><ul>${expLi(o,"w","ที่คุณเลือก")}${expLi(qx,"r","คำตอบที่ถูก")}</ul></div>`}
+  else $("tres").innerHTML='<span class="ok">ถูกต้อง!</span>';
   if(opt.dir)$("q-body").innerHTML+=`<div class="read jp" style="margin-top:10px">${esc(qx.w)}${qx.r?" ("+esc(qx.r)+")":""}</div>`;
   else{$("q-body").querySelector(".read").textContent=qx.r||"";$("q-body").querySelector(".roma").textContent=qx.th}
 }
@@ -883,6 +1077,47 @@ function typed(e){
   $("q-body").querySelector(".read").textContent=qx.r;
   $("tres").innerHTML=(right?'<span class="ok">ถูกต้อง!</span> ':`<span class="ng">ยังไม่ใช่</span> คุณพิมพ์ <span class="jp">${esc($("tin").value)}</span> · คำอ่านที่ถูกคือ <b class="jp">${esc(qx.r)}</b><br>`)+` ${esc(qx.th)} · กด Enter เพื่อไปข้อต่อไป`;
 }
+const expLi=(x,cls,lab)=>x?`<li class="${cls}"><span><b>${esc(x.w)}</b><small>${esc(x.r||"")}</small></span><span>${esc(x.th)}${lab?`<small>${lab}</small>`:""}</span></li>`:"";
+/* drills: affix + sentence fill */
+const D={aff:{items:AFF,ord:[],k:0,ok:0,n:0,done:false},fill:{items:FILL,ord:[],k:0,ok:0,n:0,done:false}};
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const affKey=(it,a)=>it.p==="pre"?a+"〜":"〜"+a;
+function drill(p,next){
+  const d=D[p];
+  if(!d.ord.length||(next&&d.k>=d.ord.length-1)){d.ord=shuf(d.items.map((_,i)=>i));d.k=0}else if(next)d.k++;
+  const it=d.items[d.ord[d.k]];d.done=false;d.cur=it;
+  $(p+"-num").textContent=`ข้อ ${d.k+1} / ${d.items.length}`;
+  $(p+"-exp").hidden=true;
+  if(p==="aff"){
+    d.opts=shuf([...it.o]);d.ans=d.opts.indexOf(it.a);
+    $("aff-cat").textContent=it.p==="pre"?"คำเติมหน้า (接頭語)":"คำเติมหลัง (接尾語)";
+    $("aff-body").innerHTML=`<div class="aff">${it.p==="pre"?'<span class="blank">？</span>'+esc(it.s):esc(it.s)+'<span class="blank">？</span>'}</div>`;
+    $("aff-ans").innerHTML=d.opts.map((o,k)=>`<button class="btn" data-k="${k}"><span class="jp">${k+1}. ${esc(o)}</span></button>`).join("");
+  }else{
+    const idx=shuf(it.opts.map((_,i)=>i));d.opts=idx.map(i=>it.opts[i]);d.ans=idx.indexOf(it.a);
+    $("fill-cat").textContent="文脈規定";
+    $("fill-body").innerHTML=`<div class="sent">${esc(it.s).replace("（　）",'<span class="blank">（　）</span>')}</div>`;
+    $("fill-ans").innerHTML=d.opts.map((o,k)=>`<button class="btn" data-k="${k}"><span class="jp">${k+1}. ${esc(o.d)}</span></button>`).join("");
+  }
+}
+function drillAns(p,b){
+  const d=D[p];if(d.done||!b)return;d.done=true;
+  const k=+b.dataset.k,right=k===d.ans,it=d.cur;
+  d.n++;if(right)d.ok++;
+  $(p+"-score").textContent=`ถูก ${d.ok} จาก ${d.n} ข้อ`;
+  [...$(p+"-ans").children].forEach((el,i)=>{if(i===d.ans)el.classList.add("r");else if(i===k)el.classList.add("w")});
+  const head=right?'<p><span class="ok">ถูกต้อง!</span></p>':'<p><span class="ng">ยังไม่ใช่</span> ดูความต่างของแต่ละตัวเลือกได้ข้างล่าง</p>';
+  let body="";
+  if(p==="aff"){
+    $("aff-body").innerHTML=`<div class="aff">${esc(it.p==="pre"?it.a+it.s:it.s+it.a)}</div><div class="read jp">${esc(it.r)}</div><div class="th" style="font-size:22px">${esc(it.th)}</div>`;
+    body=`<ul>${d.opts.map((o,i)=>{const x=WM[affKey(it,o)];return`<li class="${i===d.ans?"r":i===k?"w":""}"><span><b>${esc(affKey(it,o))}</b><small>${x?esc(x.r):""}</small></span><span>${x?esc(x.th):""}${i===d.ans?"<small>คำตอบที่ถูก</small>":i===k?"<small>ที่คุณเลือก</small>":""}</span></li>`}).join("")}</ul>`;
+  }else{
+    const c=d.opts[d.ans];
+    $("fill-body").innerHTML=`<div class="sent">${esc(it.s).replace("（　）",`<span class="blank">${esc(c.d)}</span>`)}</div><div class="roma" style="text-align:left;font-size:16px">${esc(it.th)}</div>`;
+    body=`<ul>${d.opts.map((o,i)=>expLi(WM[o.b],i===d.ans?"r":i===k?"w":"",(o.d!==o.b?"รูปพจนานุกรม · ":"")+(i===d.ans?"คำตอบที่ถูก":i===k?"ที่คุณเลือก":""))).join("")}</ul>`;
+  }
+  $(p+"-exp").innerHTML=head+body;$(p+"-exp").hidden=false;
+}
 /* list */
 function list(){
   const q=$("search").value.trim().toLowerCase();
@@ -891,11 +1126,25 @@ function list(){
 }
 function setMode(m){
   mode=m;
-  ["card","quiz","list"].forEach(k=>{$("v-"+k).hidden=k!==m;$("t-"+k).setAttribute("aria-pressed",k===m)});
-  if(m==="card")render();if(m==="quiz")quiz();if(m==="list")list();
+  ["card","quiz","list","aff","fill"].forEach(k=>{$("v-"+k).hidden=k!==m;$("t-"+k).setAttribute("aria-pressed",k===m)});
+  document.querySelectorAll(".wf").forEach(el=>el.hidden=m==="aff"||m==="fill");
+  if(m==="card")render();if(m==="quiz")quiz();if(m==="list")list();if(m==="aff"||m==="fill"){if(!D[m].cur)drill(m)}
 }
 function refresh(){progress();if(mode==="card")render();if(mode==="quiz")quiz();if(mode==="list")list()}
 /* events */
+$("t-aff").onclick=()=>setMode("aff");$("t-fill").onclick=()=>setMode("fill");
+["aff","fill"].forEach(p=>{$(p+"-ans").onclick=e=>drillAns(p,e.target.closest("button"));$(p+"-next").onclick=()=>drill(p,true)});
+let rsT=null;
+$("o-reset").onclick=e=>{
+  const b=e.currentTarget,filtered=cat!=="all"||grp!=="all";
+  if(!rsT){b.textContent=filtered?"กดอีกครั้งเพื่อล้างเฉพาะตัวกรองนี้":"กดอีกครั้งเพื่อล้างทั้งหมด";b.setAttribute("aria-pressed",true);rsT=setTimeout(()=>{rsT=null;b.textContent="รีเซ็ตที่จำได้";b.setAttribute("aria-pressed",false)},4000);return}
+  clearTimeout(rsT);rsT=null;
+  inCat().forEach(x=>known.delete(x.w));save();
+  qs={ok:0,n:0};$("q-score").textContent="ถูก 0 จาก 0 ข้อ";
+  ["aff","fill"].forEach(p=>{D[p].ok=0;D[p].n=0;$(p+"-score").textContent="ถูก 0 จาก 0 ข้อ"});
+  b.textContent="รีเซ็ตแล้ว";b.setAttribute("aria-pressed",false);setTimeout(()=>{b.textContent="รีเซ็ตที่จำได้"},1500);
+  pos=0;flipped=false;refresh();
+};
 $("t-card").onclick=()=>setMode("card");$("t-quiz").onclick=()=>setMode("quiz");$("t-list").onclick=()=>setMode("list");
 $("chips").onclick=e=>{const b=e.target.closest("button");if(!b)return;cat=b.dataset.c;pos=0;flipped=false;chips();refresh()};
 $("chips2").onclick=e=>{const b=e.target.closest("button");if(!b)return;grp=b.dataset.g;pos=0;flipped=false;chips();refresh()};
@@ -920,6 +1169,9 @@ document.addEventListener("keydown",e=>{
     else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1);
     else if(e.key==="ArrowUp"){e.preventDefault();mark(true)}else if(e.key==="ArrowDown"){e.preventDefault();mark(false)}
     else if(e.key==="s"||e.key==="S"){const x=pool()[pos];if(x)speak(x)}
+  }else if(mode==="aff"||mode==="fill"){
+    if(/^[1-4]$/.test(e.key))drillAns(mode,$(mode+"-ans").children[+e.key-1]);
+    else if(e.key==="Enter"||e.key==="ArrowRight")drill(mode,true);
   }else if(mode==="quiz"&&qmode==="mc"){
     if(/^[1-4]$/.test(e.key))answer($("ans").children[+e.key-1]);
     else if(e.key==="Enter"||e.key==="ArrowRight")quiz();
